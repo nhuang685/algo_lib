@@ -36,8 +36,6 @@ impl<S: Monoid> Seg<S> {
         &self.d[1]
     }
     pub fn query(&self, bounds: impl RangeBounds<usize>) -> S {
-        // l += self.len;
-        // r += self.len;
         let mut l = match bounds.start_bound() {
             Bound::Included(&x) => x,
             Bound::Excluded(&x) => x + 1,
@@ -64,6 +62,8 @@ impl<S: Monoid> Seg<S> {
                 rv = self.d[r].clone() + rv;
                 r -= 1;
             }
+            l >>= 1;
+            r >>= 1;
         }
         lv + rv
     }
@@ -76,7 +76,7 @@ where
     fn from(value: &[S]) -> Self {
         let mut seg = Self::with_size(value.len());
         seg.d[seg.len..seg.len + seg.n].clone_from_slice(value);
-        for i in (1..seg.len - 1).rev() {
+        for i in (1..seg.len).rev() {
             seg.pull(i);
         }
         seg
