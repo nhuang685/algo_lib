@@ -1,11 +1,12 @@
 use std::{
-    fmt::Debug,
+    fmt::{Debug, Display},
     ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign},
 };
 
 pub trait Arithmetic:
     Copy
     + Debug
+    + Display
     + Add<Output = Self>
     + AddAssign
     + Sub<Output = Self>

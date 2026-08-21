@@ -1,6 +1,7 @@
-use std::mem;
+use std::{iter, mem};
 
 pub struct Graph<T> {
+    n: usize,
     first: Vec<Option<usize>>,
     nxt: Vec<Option<usize>>,
     v: Vec<T>,
@@ -8,6 +9,7 @@ pub struct Graph<T> {
 impl<T> Graph<T> {
     pub fn new(n: usize, m: usize) -> Self {
         Graph {
+            n,
             first: vec![None; n],
             nxt: Vec::with_capacity(m),
             v: Vec::with_capacity(m),
@@ -30,6 +32,9 @@ impl<T> Graph<T> {
             v: &mut self.v,
             cur: self.first[u],
         }
+    }
+    pub fn iter(&self) -> impl Iterator<Item = (usize, &T)> {
+        (0..self.n).flat_map(|i| iter::repeat(i).zip(self.list(i)))
     }
 }
 impl Graph<usize> {

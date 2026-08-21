@@ -31,9 +31,11 @@ pub trait Integer:
     + 'static
 {
     type Up: From<Self> + Integer;
-    fn max() -> Self;
-    fn min() -> Self;
+    fn max_value() -> Self;
+    fn min_value() -> Self;
+    fn inf() -> Self;
     fn downcast(val: Self::Up) -> Self;
+    fn upcast(self) -> Self::Up;
     fn as_usize(self) -> usize;
     fn gcd(self, rhs: Self) -> Self {
         if rhs == Self::zero() {
@@ -42,10 +44,20 @@ pub trait Integer:
             rhs.gcd(self % rhs)
         }
     }
+    fn lcm(self, rhs: Self) -> Self {
+        self / self.gcd(rhs) * rhs
+    }
+    fn mod_mul(self, rhs: Self, m: Self) -> Self {
+        Self::downcast(self.upcast() * rhs.upcast() % m.upcast())
+    }
+    fn wrapping_add(self, rhs: Self) -> Self;
+    fn wrapping_sub(self, rhs: Self) -> Self;
+    fn wrapping_mul(self, rhs: Self) -> Self;
+    fn wrapping_div(self, rhs: Self) -> Self;
 }
 
 macro_rules! integer_impl {
-    ($t: ty, $up: ty) => {
+    ($t: ty, $up: ty, $inf: literal) => {
         impl Arithmetic for $t {
             fn zero() -> Self {
                 0
@@ -65,30 +77,48 @@ macro_rules! integer_impl {
         }
         impl Integer for $t {
             type Up = $up;
-            fn max() -> Self {
+            fn max_value() -> Self {
                 <$t>::MAX
             }
-            fn min() -> Self {
+            fn min_value() -> Self {
                 <$t>::MIN
+            }
+            fn inf() -> Self {
+                $inf
             }
             fn downcast(val: Self::Up) -> Self {
                 val as $t
             }
+            fn upcast(self) -> Self::Up {
+                self as $up
+            }
             fn as_usize(self) -> usize {
                 self as usize
+            }
+            fn wrapping_add(self, rhs: Self) -> Self {
+                <$t>::wrapping_add(self, rhs)
+            }
+            fn wrapping_sub(self, rhs: Self) -> Self {
+                <$t>::wrapping_sub(self, rhs)
+            }
+            fn wrapping_mul(self, rhs: Self) -> Self {
+                <$t>::wrapping_mul(self, rhs)
+            }
+            fn wrapping_div(self, rhs: Self) -> Self {
+                <$t>::wrapping_div(self, rhs)
             }
         }
     };
 }
-integer_impl!(i128, i128);
-integer_impl!(i64, i128);
-integer_impl!(i32, i64);
-integer_impl!(i16, i32);
-integer_impl!(i8, i16);
-integer_impl!(isize, isize);
-integer_impl!(u128, u128);
-integer_impl!(u64, u128);
-integer_impl!(u32, u64);
-integer_impl!(u16, u32);
-integer_impl!(u8, u16);
-integer_impl!(usize, usize);
+integer_impl!(i128, i128, 0x3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f);
+integer_impl!(i64, i128, 0x3f3f3f3f3f3f3f3f);
+integer_impl!(i32, i64, 0x3f3f3f3f);
+integer_impl!(i16, i32, 0x3f3f);
+integer_impl!(i8, i16, 0x3f);
+integer_impl!(isize, isize, 0x3f3f3f3f3f3f3f3f);
+integer_impl!(u128, u128, 0x3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f);
+integer_impl!(u64, u128, 0x3f3f3f3f3f3f3f3f);
+integer_impl!(u32, u64, 0x3f3f3f3f);
+integer_impl!(u16, u32, 0x3f3f);
+integer_impl!(u8, u16, 0x3f);
+integer_impl!(usize, usize, 0x3f3f3f3f3f3f3f3f);

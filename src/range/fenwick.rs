@@ -23,11 +23,12 @@ where
             i += i & i.wrapping_neg();
         }
     }
+    /// computes the sum from [0, r)
     pub fn sum(&self, mut i: usize) -> T {
         let mut sum = T::zero();
         while i > 0 {
             sum += self.vals[i];
-            i += i & i.wrapping_neg();
+            i -= i & i.wrapping_neg();
         }
         sum
     }
