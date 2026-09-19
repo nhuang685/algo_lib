@@ -14,7 +14,7 @@ macro_rules! create_value {
         #[allow(non_upper_case_globals)]
         static mut $vname: $t = $val;
         #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Default)]
-        pub struct $name;
+        $v struct $name;
         impl $crate::util::value::Value<$t> for $name {
             fn val() -> $t {
                 return unsafe { $vname };

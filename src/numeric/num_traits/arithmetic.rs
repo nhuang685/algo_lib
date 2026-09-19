@@ -45,3 +45,25 @@ macro_rules! arithmetic_impl_float {
     )+};
 }
 arithmetic_impl_float!(f32 f64);
+macro_rules! arithmetic_impl {
+    ($($t: ty)+) => {$(
+        impl Arithmetic for $t {
+            fn zero() -> Self {
+                0
+            }
+            fn one() -> Self {
+                1
+            }
+            fn two() -> Self {
+                2
+            }
+            fn from_usize(val: usize) -> Self {
+                val as $t
+            }
+            fn from_u8(val: u8) -> Self {
+                val as $t
+            }
+        }
+    )+};
+}
+arithmetic_impl!(isize i8 i16 i32 i64 i128 usize u8 u16 u32 u64 u128);

@@ -30,7 +30,7 @@ pub trait Integer:
     + Hash
     + 'static
 {
-    type Up: From<Self> + Integer;
+    type Up: Integer;
     fn max_value() -> Self;
     fn min_value() -> Self;
     fn inf() -> Self;
@@ -58,23 +58,6 @@ pub trait Integer:
 
 macro_rules! integer_impl {
     ($t: ty, $up: ty, $inf: literal) => {
-        impl Arithmetic for $t {
-            fn zero() -> Self {
-                0
-            }
-            fn one() -> Self {
-                1
-            }
-            fn two() -> Self {
-                2
-            }
-            fn from_usize(val: usize) -> Self {
-                val as $t
-            }
-            fn from_u8(val: u8) -> Self {
-                val as $t
-            }
-        }
         impl Integer for $t {
             type Up = $up;
             fn max_value() -> Self {
@@ -115,10 +98,10 @@ integer_impl!(i64, i128, 0x3f3f3f3f3f3f3f3f);
 integer_impl!(i32, i64, 0x3f3f3f3f);
 integer_impl!(i16, i32, 0x3f3f);
 integer_impl!(i8, i16, 0x3f);
-integer_impl!(isize, isize, 0x3f3f3f3f3f3f3f3f);
+integer_impl!(isize, i128, 0x3f3f3f3f3f3f3f3f);
 integer_impl!(u128, u128, 0x3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f);
 integer_impl!(u64, u128, 0x3f3f3f3f3f3f3f3f);
 integer_impl!(u32, u64, 0x3f3f3f3f);
 integer_impl!(u16, u32, 0x3f3f);
 integer_impl!(u8, u16, 0x3f);
-integer_impl!(usize, usize, 0x3f3f3f3f3f3f3f3f);
+integer_impl!(usize, u128, 0x3f3f3f3f3f3f3f3f);

@@ -69,13 +69,20 @@ impl<S: Monoid> Seg<S> {
     }
 }
 
-impl<S> From<&[S]> for Seg<S>
+impl<S> Seg<S>
 where
     S: Monoid,
 {
-    fn from(value: &[S]) -> Self {
+    pub fn from_slice<T>(value: &[T]) -> Self
+    where
+        S: From<T>,
+        T: Clone,
+    {
         let mut seg = Self::with_size(value.len());
-        seg.d[seg.len..seg.len + seg.n].clone_from_slice(value);
+        // seg.d[seg.len..seg.len + seg.n].clone_from_slice(value);
+        for (dest, val) in seg.d[seg.len..seg.len + seg.n].iter_mut().zip(value) {
+            *dest = S::from(val.clone());
+        }
         for i in (1..seg.len).rev() {
             seg.pull(i);
         }

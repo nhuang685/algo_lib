@@ -205,7 +205,7 @@ macro_rules! mod_impl {
                 ext_eucl(self.v as i64, Self::modu() as i64).map(|val| Self::from(val.0))
             }
             pub fn last_k(n: $s, k: $s) -> Self {
-                (n..n - k).map(Self::from).fold(Self::one(), |a, b| a * b)
+                (n - k + 1..=n).map(Self::from).fold(Self::one(), |a, b| a * b)
             }
         }
 
