@@ -27,6 +27,25 @@ pub fn ext_eucl<T: Signed>(a: T, b: T) -> Option<(T, T)> {
 pub trait BaseMod<S: Unsigned>: Arithmetic + Eq + Ord + Hash + Default {
     fn val(self) -> S;
     fn modu() -> S;
+    // fn inv(self) -> Self;
+    fn pow<T: Integer>(mut self, mut exp: T) -> Self {
+        let mut res = Self::one();
+        while exp > T::zero() {
+            if exp % T::two() == T::one() {
+                res *= self;
+            }
+            self *= self;
+            exp /= T::two();
+        }
+        res
+    }
+    fn inv(&self) -> Self {
+        match self.inv_checked() {
+            Some(val) => val,
+            None => panic!("gcd({}, {}) != 1", self.val(), Self::modu()),
+        }
+    }
+    fn inv_checked(self) -> Option<Self>;
 }
 
 macro_rules! from_unsigned_lower {
@@ -184,26 +203,6 @@ macro_rules! mod_impl {
                     phantom: PhantomData,
                 }
             }
-            pub fn pow<T: Integer>(mut self, mut exp: T) -> Self {
-                let mut res = Self::one();
-                while exp > T::zero() {
-                    if exp % T::two() == T::one() {
-                        res *= self;
-                    }
-                    self *= self;
-                    exp /= T::two();
-                }
-                res
-            }
-            pub fn inv(&self) -> Self {
-                match self.inv_checked() {
-                    Some(val) => val,
-                    None => panic!("gcd({}, {}) != 1", self.v, Self::modu()),
-                }
-            }
-            pub fn inv_checked(&self) -> Option<Self> {
-                ext_eucl(self.v as i64, Self::modu() as i64).map(|val| Self::from(val.0))
-            }
             pub fn last_k(n: $s, k: $s) -> Self {
                 (n - k + 1..=n).map(Self::from).fold(Self::one(), |a, b| a * b)
             }
@@ -236,6 +235,9 @@ macro_rules! mod_impl {
             fn modu() -> $s {
                 V::val()
             }
+            fn inv_checked(self) -> Option<Self> {
+                ext_eucl(self.v as i64, Self::modu() as i64).map(|val| Self::from(val.0))
+            }
         }
     }
 }
@@ -247,3 +249,5 @@ create_value!(V1e9_7, pub v1e9_7: u32 = 1_000_000_007);
 pub type Mint1e9_7 = Modular<V1e9_7>;
 create_value!(V998244353, pub v998244353: u32 = 998_244_353);
 pub type Mint998244353 = Modular<V998244353>;
+
+pub mod combo;

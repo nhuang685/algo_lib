@@ -3,3 +3,4 @@ pub mod lseg;
 pub mod mapping;
 pub mod monoid;
 pub mod seg;
+pub mod sparsetree;
