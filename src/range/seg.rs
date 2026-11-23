@@ -9,16 +9,26 @@ pub struct Seg<S> {
     d: Vec<S>,
 }
 impl<S: Monoid> Seg<S> {
-    pub fn with_size(size: usize) -> Self {
+    fn new(size: usize) -> Self {
         let len = size.next_power_of_two();
         Seg {
             n: size,
             len,
-            d: vec![S::default(); 2 * len],
+            d: vec![S::e_1(); 2 * len],
         }
     }
+    fn build(&mut self) {
+        for i in (1..self.len).rev() {
+            self.pull(i);
+        }
+    }
+    pub fn with_size(size: usize) -> Self {
+        let mut seg = Self::new(size);
+        seg.build();
+        seg
+    }
     fn pull(&mut self, i: usize) {
-        self.d[i] = self.d[i << 1].clone() + self.d[(i << 1) + 1].clone();
+        self.d[i] = self.d[i << 1].clone().op(self.d[(i << 1) + 1].clone());
     }
     pub fn set(&mut self, mut i: usize, val: S) {
         i += self.len;
@@ -47,25 +57,25 @@ impl<S: Monoid> Seg<S> {
             Bound::Unbounded => self.n,
         };
         if l >= r {
-            return S::default();
+            return S::e();
         }
         l += self.len;
         r += self.len - 1;
-        let mut lv = S::default();
-        let mut rv = S::default();
+        let mut lv = S::e();
+        let mut rv = S::e();
         while l <= r {
             if l & 1 == 1 {
-                lv = lv + self.d[l].clone();
+                lv = lv.op(self.d[l].clone());
                 l += 1;
             }
             if r & 1 == 0 {
-                rv = self.d[r].clone() + rv;
+                rv = self.d[r].clone().op(rv);
                 r -= 1;
             }
             l >>= 1;
             r >>= 1;
         }
-        lv + rv
+        lv.op(rv)
     }
 }
 
@@ -83,9 +93,7 @@ where
         for (dest, val) in seg.d[seg.len..seg.len + seg.n].iter_mut().zip(value) {
             *dest = S::from(val.clone());
         }
-        for i in (1..seg.len).rev() {
-            seg.pull(i);
-        }
+        seg.build();
         seg
     }
 }

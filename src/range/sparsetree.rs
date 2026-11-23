@@ -18,18 +18,20 @@ impl<S: Monoid> ST<S> {
         if values.is_empty() {
             return Self {
                 n: 0,
-                d: Arr2D::new(S::default(), 0, 0),
+                d: Arr2D::new(S::e(), 0, 0),
             };
         }
         let n = values.len();
         let lg = n.ilog2() as usize;
-        let mut d = Arr2D::new(S::default(), lg + 1, n);
+        let mut d = Arr2D::new(S::e(), lg + 1, n);
         for (dest, val) in d[0].iter_mut().zip(values) {
             *dest = S::from(val.clone());
         }
         for i in 1..=lg {
             for j in 0..=n - (1 << i) {
-                d[i][j] = d[(i - 1, j)].clone() + d[(i - 1, j + (1 << (i - 1)))].clone();
+                d[i][j] = d[(i - 1, j)]
+                    .clone()
+                    .op(d[(i - 1, j + (1 << (i - 1)))].clone());
             }
         }
         Self { n, d }
@@ -47,9 +49,11 @@ impl<S: Monoid> ST<S> {
             Bound::Unbounded => self.n,
         };
         if l >= r {
-            return S::default();
+            return S::e();
         }
         let lg = (r - l).ilog2() as usize;
-        self.d[(lg, l)].clone() + self.d[(lg, r - (1 << lg))].clone()
+        self.d[(lg, l)]
+            .clone()
+            .op(self.d[(lg, r - (1 << lg))].clone())
     }
 }
